@@ -281,6 +281,25 @@
             text-decoration: underline;
         }
         
+        /* 动图背景 */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(120, 0, 255, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 0, 120, 0.2) 0%, transparent 50%);
+            animation: pulse 8s infinite alternate;
+            z-index: -1;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
         /* 预约系统样式 */
         .booking-system {
             display: none;
@@ -811,25 +830,6 @@
             box-shadow: 0 5px 15px rgba(255, 0, 128, 0.3);
         }
         
-        /* 动图背景 */
-        .animated-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 30%, rgba(120, 0, 255, 0.2) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(255, 0, 120, 0.2) 0%, transparent 50%);
-            animation: pulse 8s infinite alternate;
-            z-index: -1;
-        }
-        
-        @keyframes pulse {
-            0% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-        
         @media (max-width: 768px) {
             .role-selection {
                 grid-template-columns: 1fr;
@@ -1083,6 +1083,22 @@
                     <label class="form-label" for="teacherPhone">手机号码</label>
                     <input type="tel" id="teacherPhone" class="form-input" placeholder="请输入手机号码" required>
                 </div>
+                <div class="form-group">
+                    <label class="form-label" for="teacherSubject">教学科目</label>
+                    <input type="text" id="teacherSubject" class="form-input" placeholder="请输入教学科目" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="teacherGender">性别</label>
+                    <select id="teacherGender" class="form-input" required>
+                        <option value="">请选择性别</option>
+                        <option value="male">男</option>
+                        <option value="female">女</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="teacherNote">备注信息</label>
+                    <textarea id="teacherNote" class="form-input" placeholder="请输入备注信息" style="height: 80px;"></textarea>
+                </div>
                 <button type="submit" class="submit-btn">注册</button>
             </form>
             
@@ -1109,584 +1125,1652 @@
             
             <button class="back-btn" id="teacherBack">返回</button>
         </div>
-        
-        <!-- 预约系统主页面 -->
-        <div class="booking-system" id="bookingSystem">
+    </div>
+
+    <!-- 预约系统页面 -->
+    <div class="booking-system" id="bookingSystem">
+        <div class="container">
             <header>
                 <div class="header-content">
-                    <h1>无畏契约·稳稳提分训练营——预约系统</h1>
+                    <div class="logo">教师预约系统</div>
                     <div class="user-info">
-                        <span class="welcome-msg">欢迎，<span id="userName">学员</span></span>
+                        <div class="welcome-msg">欢迎<span id="userRole"></span>：<span id="userName"></span></div>
                         <button class="logout-btn" id="logoutBtn">退出登录</button>
                     </div>
                 </div>
             </header>
             
+            <div class="instructions">
+                <h3>使用说明</h3>
+                <ul>
+                    <li id="selectTeacherInstruction">选择您要预约的教师（点击教师卡片选择）</li>
+                    <li id="editTeacherInfo" style="display: none;">点击教师头像可以编辑教师信息</li>
+                    <li>选择日期和时间段（以30分钟为单位）</li>
+                    <li>最多可连续预约1小时（2个时间段）</li>
+                    <li>确认预约后可在下方查看您的预约记录</li>
+                    <li>红色时间段表示已被预约，不可选择</li>
+                    <li>灰色时间段表示不可预约</li>
+                    <li>蓝色图标表示男教师，粉色图标表示女教师</li>
+                    <li id="studentLimitInfo" style="display: none;">学员每天最多只能预约2小时</li>
+                </ul>
+            </div>
+            
             <div class="main-content">
                 <div class="teachers-section">
-                    <h2 class="section-title">教练列表</h2>
+                    <h2 class="section-title" id="teacherSectionTitle">选择教师</h2>
                     <div class="teachers-list" id="teachersList">
-                        <!-- 教练列表将通过JavaScript动态生成 -->
+                        <!-- 教师列表将通过JavaScript动态生成 -->
                     </div>
-                    <button class="add-teacher-btn" id="addTeacherBtn">添加新教练</button>
+                    <button class="add-teacher-btn" id="addTeacherBtn" style="display: none;">添加新教师</button>
                 </div>
                 
                 <div class="booking-section">
-                    <h2 class="section-title">预约课程</h2>
+                    <h2 class="section-title">选择时间</h2>
                     <div class="calendar">
                         <div class="calendar-header">
-                            <div class="current-date" id="currentDate">2023年11月</div>
+                            <div class="current-date" id="currentDate">2023年10月20日</div>
                             <div class="calendar-nav">
-                                <button class="nav-btn" id="prevMonth"><i class="fas fa-chevron-left"></i></button>
-                                <button class="nav-btn" id="todayBtn">今天</button>
-                                <button class="nav-btn" id="nextMonth"><i class="fas fa-chevron-right"></i></button>
+                                <button class="nav-btn" id="prevDay"><i class="fas fa-chevron-left"></i></button>
+                                <button class="nav-btn" id="nextDay"><i class="fas fa-chevron-right"></i></button>
                             </div>
                         </div>
+                        
+                        <div id="dailyLimitInfo" class="daily-limit" style="display: none;">
+                            今日已预约：<span id="todayBookedHours">0</span>小时，剩余可预约：<span id="remainingHours">2</span>小时
+                        </div>
+                        
                         <div class="time-slots" id="timeSlots">
                             <!-- 时间槽将通过JavaScript动态生成 -->
                         </div>
-                    </div>
-                    
-                    <div class="daily-limit">
-                        <i class="fas fa-info-circle"></i> 每日最多可预约2节课，您今天已预约<span id="bookedCount">0</span>节课
+                        
+                        <div class="legend">
+                            <div class="legend-item">
+                                <div class="legend-color legend-available"></div>
+                                <span>可预约</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color legend-selected"></div>
+                                <span>已选择</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color legend-booked"></div>
+                                <span>已预约</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color legend-unavailable"></div>
+                                <span>不可预约</span>
+                            </div>
+                        </div>
                     </div>
                     
                     <div class="booking-summary">
+                        <h3>预约信息</h3>
                         <div class="summary-item">
-                            <span>选择的教练:</span>
-                            <span id="selectedTeacherName">未选择</span>
-                        </div>
-                        <div class="summary-item">
-                            <span>选择的时间:</span>
-                            <span id="selectedTimeSlot">未选择</span>
+                            <span>教师：</span>
+                            <span id="selectedTeacher">未选择</span>
                         </div>
                         <div class="summary-item">
-                            <span>课程时长:</span>
-                            <span>60分钟</span>
+                            <span>日期：</span>
+                            <span id="selectedDate">未选择</span>
                         </div>
                         <div class="summary-item">
-                            <span>课程费用:</span>
-                            <span id="courseFee">0</span> 元
+                            <span>时间：</span>
+                            <span id="selectedTime">未选择</span>
                         </div>
-                        <button class="confirm-btn" id="confirmBookingBtn" disabled>确认预约</button>
-                        <div class="success-message" id="bookingSuccessMessage">
-                            预约成功！您可以在下方查看您的预约记录。
+                        <div class="summary-item">
+                            <span>时长：</span>
+                            <span id="selectedDuration">0 小时</span>
                         </div>
+                        
+                        <button class="confirm-btn" id="confirmBtn" disabled>确认预约</button>
+                        <div class="success-message" id="successMessage"></div>
                     </div>
                 </div>
             </div>
             
             <div class="my-bookings">
-                <h2 class="section-title">我的预约记录</h2>
+                <h2 class="section-title">我的预约</h2>
                 <div id="bookingsList">
-                    <!-- 预约记录将通过JavaScript动态生成 -->
+                    <!-- 预约列表将通过JavaScript动态生成 -->
+                    <div class="no-bookings">暂无预约记录</div>
                 </div>
             </div>
         </div>
     </div>
-    
+
     <!-- 确认预约模态框 -->
     <div class="modal" id="confirmModal">
         <div class="modal-content">
             <h2 class="modal-title">确认预约</h2>
-            <div class="instructions">
-                <h3>预约须知</h3>
-                <ul>
-                    <li>预约成功后，请准时参加课程</li>
-                    <li>如需取消预约，请至少提前2小时操作</li>
-                    <li>无故缺席将影响您的信誉度</li>
-                    <li>课程开始前15分钟可进入训练室准备</li>
-                </ul>
-            </div>
-            <div class="summary-item">
-                <span>教练:</span>
-                <span id="modalTeacherName">未选择</span>
-            </div>
-            <div class="summary-item">
-                <span>时间:</span>
-                <span id="modalTimeSlot">未选择</span>
-            </div>
-            <div class="summary-item">
-                <span>费用:</span>
-                <span id="modalCourseFee">0</span> 元
+            <p>您确定要预约以下课程吗？</p>
+            <div style="text-align: left; background-color: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 5px; margin: 15px 0;">
+                <div><strong>教师：</strong><span id="confirmTeacher"></span></div>
+                <div><strong>时间：</strong><span id="confirmDateTime"></span></div>
+                <div><strong>时长：</strong><span id="confirmDuration"></span></div>
             </div>
             <div class="modal-buttons">
-                <button class="modal-btn cancel" id="cancelConfirmBtn">取消</button>
-                <button class="modal-btn confirm" id="finalConfirmBtn">确认预约</button>
+                <button class="modal-btn cancel" id="cancelConfirm">取消</button>
+                <button class="modal-btn confirm" id="finalConfirm">确认预约</button>
             </div>
         </div>
     </div>
-    
-    <!-- 取消预约模态框 -->
-    <div class="modal" id="cancelModal">
+
+    <!-- 教练/管理员预约模态框 -->
+    <div class="modal" id="teacherBookingModal">
         <div class="modal-content">
-            <h2 class="modal-title">取消预约</h2>
-            <p>您确定要取消该预约吗？</p>
-            <div class="summary-item">
-                <span>教练:</span>
-                <span id="cancelTeacherName">未选择</span>
-            </div>
-            <div class="summary-item">
-                <span>时间:</span>
-                <span id="cancelTimeSlot">未选择</span>
-            </div>
-            <div class="modal-buttons">
-                <button class="modal-btn cancel" id="cancelCancelBtn">不取消</button>
-                <button class="modal-btn delete" id="finalCancelBtn">确认取消</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- 添加教练模态框 -->
-    <div class="modal" id="addTeacherModal">
-        <div class="modal-content">
-            <h2 class="modal-title">添加新教练</h2>
+            <h2 class="modal-title">预约信息</h2>
             <div class="form-group">
-                <label class="form-label" for="newTeacherName">教练姓名</label>
-                <input type="text" id="newTeacherName" class="form-input" placeholder="请输入教练姓名">
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="newTeacherSubject">专长科目</label>
-                <input type="text" id="newTeacherSubject" class="form-input" placeholder="请输入专长科目">
-            </div>
-            <div class="form-group">
-                <label class="form-label" for="newTeacherNote">备注</label>
-                <input type="text" id="newTeacherNote" class="form-input" placeholder="请输入备注信息">
+                <label class="form-label" for="studentName">学生姓名</label>
+                <input type="text" id="studentName" class="form-input" placeholder="请输入学生姓名" required>
             </div>
             <div class="checkbox-group">
-                <input type="checkbox" id="newTeacherGender" checked>
-                <label for="newTeacherGender">男性教练</label>
+                <input type="checkbox" id="markUnavailable">
+                <label for="markUnavailable">标记为不可预约</label>
+            </div>
+            <div style="text-align: left; background-color: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 5px; margin: 15px 0;">
+                <div><strong>教师：</strong><span id="teacherConfirmTeacher"></span></div>
+                <div><strong>时间：</strong><span id="teacherConfirmDateTime"></span></div>
+                <div><strong>时长：</strong><span id="teacherConfirmDuration"></span></div>
             </div>
             <div class="modal-buttons">
-                <button class="modal-btn cancel" id="cancelAddTeacherBtn">取消</button>
-                <button class="modal-btn confirm" id="confirmAddTeacherBtn">添加</button>
+                <button class="modal-btn cancel" id="cancelTeacherBooking">取消</button>
+                <button class="modal-btn confirm" id="confirmTeacherBooking">确认预约</button>
             </div>
         </div>
     </div>
-    
+
+    <!-- 编辑教师信息模态框 -->
+    <div class="modal" id="editTeacherModal">
+        <div class="modal-content">
+            <h2 class="modal-title">编辑教师信息</h2>
+            <form id="teacherForm">
+                <div class="form-group">
+                    <label class="form-label" for="teacherName">教师姓名</label>
+                    <input type="text" id="teacherName" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="teacherSubject">教学科目</label>
+                    <input type="text" id="teacherSubject" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="teacherNote">备注信息</label>
+                    <textarea id="teacherNote" class="form-input" placeholder="请输入教师的备注信息..." style="height: 80px;"></textarea>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="modal-btn delete" id="deleteTeacher">删除教师</button>
+                    <div>
+                        <button type="button" class="modal-btn cancel" id="cancelEdit">取消</button>
+                        <button type="submit" class="modal-btn confirm">保存</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 删除教师确认模态框 -->
+    <div class="modal" id="deleteTeacherModal">
+        <div class="modal-content">
+            <h2 class="modal-title">删除教师</h2>
+            <p>您确定要删除这位教师吗？此操作不可撤销，并且会删除该教师的所有预约记录。</p>
+            <div style="text-align: left; background-color: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 5px; margin: 15px 0;">
+                <div><strong>教师：</strong><span id="deleteTeacherName"></span></div>
+                <div><strong>科目：</strong><span id="deleteTeacherSubject"></span></div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn cancel" id="cancelDelete">取消</button>
+                <button class="modal-btn delete" id="confirmDelete">确认删除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加教师模态框 -->
+    <div class="modal" id="addTeacherModal">
+        <div class="modal-content">
+            <h2 class="modal-title">添加教师</h2>
+            <form id="addTeacherForm">
+                <div class="form-group">
+                    <label class="form-label" for="newTeacherName">教师姓名</label>
+                    <input type="text" id="newTeacherName" class="form-input" placeholder="请输入教师姓名" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="newTeacherSubject">教学科目</label>
+                    <input type="text" id="newTeacherSubject" class="form-input" placeholder="请输入教学科目" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="newTeacherGender">性别</label>
+                    <select id="newTeacherGender" class="form-input" required>
+                        <option value="">请选择性别</option>
+                        <option value="male">男</option>
+                        <option value="female">女</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="newTeacherNote">备注信息</label>
+                    <textarea id="newTeacherNote" class="form-input" placeholder="请输入备注信息" style="height: 80px;"></textarea>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="modal-btn cancel" id="cancelAddTeacher">取消</button>
+                    <button type="submit" class="modal-btn confirm">添加教师</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
-        // 页面元素引用
+        // 初始化用户数据存储
+        function initializeUserData() {
+            if (!localStorage.getItem('adminUsers')) {
+                localStorage.setItem('adminUsers', JSON.stringify([]));
+            }
+            if (!localStorage.getItem('studentUsers')) {
+                localStorage.setItem('studentUsers', JSON.stringify([]));
+            }
+            if (!localStorage.getItem('teacherUsers')) {
+                localStorage.setItem('teacherUsers', JSON.stringify([]));
+            }
+            
+            // 初始化教师数据
+            if (!localStorage.getItem('teachers')) {
+                const teachers = [
+                    { id: 1, name: "张老师", subject: "数学", note: "擅长高中数学教学", gender: "male" },
+                    { id: 2, name: "李老师", subject: "英语", note: "英语口语流利", gender: "female" },
+                    { id: 3, name: "王老师", subject: "物理", note: "物理竞赛指导经验丰富", gender: "male" },
+                    { id: 4, name: "赵老师", subject: "化学", note: "注重实验教学", gender: "female" },
+                    { id: 5, name: "刘老师", subject: "生物", note: "生物实验课程负责人", gender: "male" },
+                    { id: 6, name: "陈老师", subject: "历史", note: "历史故事讲解生动", gender: "female" },
+                    { id: 7, name: "杨老师", subject: "地理", note: "地理实地考察经验丰富", gender: "male" },
+                    { id: 8, name: "黄老师", subject: "语文", note: "作文教学专家", gender: "female" }
+                ];
+                localStorage.setItem('teachers', JSON.stringify(teachers));
+            }
+            
+            // 初始化预约数据
+            if (!localStorage.getItem('bookedSlots')) {
+                const bookedSlots = [
+                    { teacherId: 1, date: '2023-10-20', time: '10:00', studentName: '张三', type: 'booked' },
+                    { teacherId: 1, date: '2023-10-20', time: '10:30', studentName: '张三', type: 'booked' },
+                    { teacherId: 2, date: '2023-10-20', time: '14:00', studentName: '李四', type: 'booked' },
+                    { teacherId: 3, date: '2023-10-20', time: '16:30', studentName: '王五', type: 'booked' },
+                    { teacherId: 4, date: '2023-10-21', time: '11:00', studentName: '赵六', type: 'booked' },
+                    { teacherId: 5, date: '2023-10-21', time: '15:30', studentName: '钱七', type: 'booked' },
+                    { teacherId: 6, date: '2023-10-21', time: '19:00', studentName: '孙八', type: 'booked' },
+                    { teacherId: 7, date: '2023-10-22', time: '13:30', studentName: '周九', type: 'booked' },
+                    { teacherId: 8, date: '2023-10-22', time: '20:00', studentName: '吴十', type: 'booked' }
+                ];
+                localStorage.setItem('bookedSlots', JSON.stringify(bookedSlots));
+            }
+            
+            // 初始化用户预约数据
+            if (!localStorage.getItem('userBookings')) {
+                localStorage.setItem('userBookings', JSON.stringify({}));
+            }
+        }
+        
+        // 获取教师数据
+        function getTeachers() {
+            return JSON.parse(localStorage.getItem('teachers')) || [];
+        }
+        
+        // 保存教师数据
+        function saveTeachers(teachers) {
+            localStorage.setItem('teachers', JSON.stringify(teachers));
+        }
+        
+        // 获取已预约时间段
+        function getBookedSlots() {
+            return JSON.parse(localStorage.getItem('bookedSlots')) || [];
+        }
+        
+        // 保存已预约时间段
+        function saveBookedSlots(bookedSlots) {
+            localStorage.setItem('bookedSlots', JSON.stringify(bookedSlots));
+        }
+        
+        // 获取用户预约
+        function getUserBookings() {
+            return JSON.parse(localStorage.getItem('userBookings')) || {};
+        }
+        
+        // 保存用户预约
+        function saveUserBookings(userBookings) {
+            localStorage.setItem('userBookings', JSON.stringify(userBookings));
+        }
+        
+        // 生成唯一的教师ID
+        function generateTeacherId() {
+            return Date.now();
+        }
+        
+        // 全局变量
+        let selectedTeacher = null;
+        let selectedDate = new Date();
+        let selectedSlots = [];
+        let currentUser = null;
+        let editingTeacher = null;
+        
+        // DOM元素
         const loginPage = document.getElementById('loginPage');
         const adminAuth = document.getElementById('adminAuth');
         const studentAuth = document.getElementById('studentAuth');
         const teacherAuth = document.getElementById('teacherAuth');
         const bookingSystem = document.getElementById('bookingSystem');
+        const userRole = document.getElementById('userRole');
+        const userName = document.getElementById('userName');
         const logoutBtn = document.getElementById('logoutBtn');
+        const editTeacherInfo = document.getElementById('editTeacherInfo');
+        const selectTeacherInstruction = document.getElementById('selectTeacherInstruction');
+        const teacherSectionTitle = document.getElementById('teacherSectionTitle');
+        const studentLimitInfo = document.getElementById('studentLimitInfo');
+        const dailyLimitInfo = document.getElementById('dailyLimitInfo');
+        const todayBookedHours = document.getElementById('todayBookedHours');
+        const remainingHours = document.getElementById('remainingHours');
+        const addTeacherBtn = document.getElementById('addTeacherBtn');
         
-        // 角色选择
-        document.querySelectorAll('.role-card').forEach(card => {
-            card.addEventListener('click', function() {
-                const role = this.getAttribute('data-role');
-                loginPage.style.display = 'none';
-                
-                if (role === 'admin') {
-                    adminAuth.style.display = 'block';
-                } else if (role === 'student') {
-                    studentAuth.style.display = 'block';
-                } else if (role === 'teacher') {
-                    teacherAuth.style.display = 'block';
-                }
-            });
-        });
+        const roleCards = document.querySelectorAll('.role-card');
+        const backButtons = document.querySelectorAll('.back-btn');
+        const authTabs = document.querySelectorAll('.auth-tab');
         
-        // 返回按钮
-        document.getElementById('adminBack').addEventListener('click', function() {
-            adminAuth.style.display = 'none';
-            loginPage.style.display = 'block';
-        });
+        // 预约系统DOM元素
+        const teachersListEl = document.getElementById('teachersList');
+        const timeSlotsEl = document.getElementById('timeSlots');
+        const currentDateEl = document.getElementById('currentDate');
+        const selectedTeacherEl = document.getElementById('selectedTeacher');
+        const selectedDateEl = document.getElementById('selectedDate');
+        const selectedTimeEl = document.getElementById('selectedTime');
+        const selectedDurationEl = document.getElementById('selectedDuration');
+        const confirmBtn = document.getElementById('confirmBtn');
+        const prevDayBtn = document.getElementById('prevDay');
+        const nextDayBtn = document.getElementById('nextDay');
+        const confirmModal = document.getElementById('confirmModal');
+        const cancelConfirm = document.getElementById('cancelConfirm');
+        const finalConfirm = document.getElementById('finalConfirm');
+        const confirmTeacherEl = document.getElementById('confirmTeacher');
+        const confirmDateTimeEl = document.getElementById('confirmDateTime');
+        const confirmDurationEl = document.getElementById('confirmDuration');
+        const successMessage = document.getElementById('successMessage');
+        const bookingsListEl = document.getElementById('bookingsList');
+        const editTeacherModal = document.getElementById('editTeacherModal');
+        const teacherForm = document.getElementById('teacherForm');
+        const teacherNameInput = document.getElementById('teacherName');
+        const teacherSubjectInput = document.getElementById('teacherSubject');
+        const teacherNoteInput = document.getElementById('teacherNote');
+        const cancelEdit = document.getElementById('cancelEdit');
+        const deleteTeacherBtn = document.getElementById('deleteTeacher');
         
-        document.getElementById('studentBack').addEventListener('click', function() {
-            studentAuth.style.display = 'none';
-            loginPage.style.display = 'block';
-        });
+        // 教练/管理员预约模态框元素
+        const teacherBookingModal = document.getElementById('teacherBookingModal');
+        const studentNameInput = document.getElementById('studentName');
+        const markUnavailableCheckbox = document.getElementById('markUnavailable');
+        const teacherConfirmTeacherEl = document.getElementById('teacherConfirmTeacher');
+        const teacherConfirmDateTimeEl = document.getElementById('teacherConfirmDateTime');
+        const teacherConfirmDurationEl = document.getElementById('teacherConfirmDuration');
+        const cancelTeacherBooking = document.getElementById('cancelTeacherBooking');
+        const confirmTeacherBooking = document.getElementById('confirmTeacherBooking');
         
-        document.getElementById('teacherBack').addEventListener('click', function() {
-            teacherAuth.style.display = 'none';
-            loginPage.style.display = 'block';
-        });
+        // 删除教师模态框元素
+        const deleteTeacherModal = document.getElementById('deleteTeacherModal');
+        const deleteTeacherName = document.getElementById('deleteTeacherName');
+        const deleteTeacherSubject = document.getElementById('deleteTeacherSubject');
+        const cancelDelete = document.getElementById('cancelDelete');
+        const confirmDelete = document.getElementById('confirmDelete');
         
-        // 认证标签切换
-        document.querySelectorAll('.auth-tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                const container = this.closest('.auth-container');
-                const tabType = this.getAttribute('data-tab');
-                
-                // 更新标签状态
-                container.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-                
-                // 显示对应的表单
-                const forms = container.querySelectorAll('.auth-form');
-                forms.forEach(form => form.style.display = 'none');
-                
-                if (tabType === 'login') {
-                    container.querySelector('.auth-form:first-child').style.display = 'block';
-                } else if (tabType === 'register') {
-                    container.querySelector('.auth-form:nth-child(2)').style.display = 'block';
-                } else if (tabType === 'reset') {
-                    container.querySelector('.auth-form:last-child').style.display = 'block';
-                }
-            });
-        });
+        // 添加教师模态框元素
+        const addTeacherModal = document.getElementById('addTeacherModal');
+        const addTeacherForm = document.getElementById('addTeacherForm');
+        const newTeacherName = document.getElementById('newTeacherName');
+        const newTeacherSubject = document.getElementById('newTeacherSubject');
+        const newTeacherGender = document.getElementById('newTeacherGender');
+        const newTeacherNote = document.getElementById('newTeacherNote');
+        const cancelAddTeacher = document.getElementById('cancelAddTeacher');
         
-        // 登录表单提交
-        document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            showMessage('adminMessage', '登录成功！', 'success');
-            setTimeout(() => {
-                adminAuth.style.display = 'none';
-                bookingSystem.style.display = 'block';
-                document.getElementById('userName').textContent = '管理员';
-                initializeBookingSystem();
-            }, 1000);
-        });
-        
-        document.getElementById('studentLoginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            showMessage('studentMessage', '登录成功！', 'success');
-            setTimeout(() => {
-                studentAuth.style.display = 'none';
-                bookingSystem.style.display = 'block';
-                document.getElementById('userName').textContent = '学员用户';
-                initializeBookingSystem();
-            }, 1000);
-        });
-        
-        document.getElementById('teacherLoginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            showMessage('teacherMessage', '登录成功！', 'success');
-            setTimeout(() => {
-                teacherAuth.style.display = 'none';
-                bookingSystem.style.display = 'block';
-                document.getElementById('userName').textContent = '教练用户';
-                initializeBookingSystem();
-            }, 1000);
-        });
-        
-        // 注册表单提交
-        document.getElementById('adminRegisterForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            showMessage('adminMessage', '注册成功！', 'success');
-        });
-        
-        document.getElementById('studentRegisterForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            showMessage('studentMessage', '注册成功！', 'success');
-        });
-        
-        document.getElementById('teacherRegisterForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            showMessage('teacherMessage', '注册成功！', 'success');
-        });
-        
-        // 重置密码表单提交
-        document.getElementById('adminResetForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            showMessage('adminMessage', '密码重置成功！', 'success');
-        });
-        
-        document.getElementById('studentResetForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            showMessage('studentMessage', '密码重置成功！', 'success');
-        });
-        
-        document.getElementById('teacherResetForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            showMessage('teacherMessage', '密码重置成功！', 'success');
-        });
-        
-        // 显示消息函数
-        function showMessage(elementId, message, type) {
-            const messageElement = document.getElementById(elementId);
-            messageElement.textContent = message;
-            messageElement.className = 'message ' + type;
-            messageElement.style.display = 'block';
+        // 初始化
+        function init() {
+            initializeUserData();
             
-            setTimeout(() => {
-                messageElement.style.display = 'none';
-            }, 3000);
+            // 角色选择事件
+            roleCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const role = this.dataset.role;
+                    showAuthPage(role);
+                });
+            });
+            
+            // 返回按钮事件
+            backButtons.forEach(button => {
+                button.addEventListener('click', showLoginPage);
+            });
+            
+            // 认证标签切换事件
+            authTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabType = this.dataset.tab;
+                    const authContainer = this.closest('.auth-container');
+                    switchAuthTab(authContainer, tabType);
+                });
+            });
+            
+            // 表单提交事件
+            setupFormHandlers();
+            
+            // 退出登录事件
+            logoutBtn.addEventListener('click', logout);
+            
+            // 预约系统事件
+            setupBookingSystem();
+            
+            // 添加教师按钮事件
+            addTeacherBtn.addEventListener('click', showAddTeacherModal);
+            
+            // 删除教师事件
+            deleteTeacherBtn.addEventListener('click', showDeleteTeacherModal);
+            cancelDelete.addEventListener('click', hideDeleteTeacherModal);
+            confirmDelete.addEventListener('click', deleteTeacher);
+            
+            // 添加教师表单事件
+            addTeacherForm.addEventListener('submit', addTeacher);
+            cancelAddTeacher.addEventListener('click', hideAddTeacherModal);
+            
+            // 点击模态框外部关闭
+            window.addEventListener('click', function(event) {
+                if (event.target === confirmModal) {
+                    hideConfirmModal();
+                }
+                if (event.target === editTeacherModal) {
+                    hideEditTeacherModal();
+                }
+                if (event.target === teacherBookingModal) {
+                    hideTeacherBookingModal();
+                }
+                if (event.target === deleteTeacherModal) {
+                    hideDeleteTeacherModal();
+                }
+                if (event.target === addTeacherModal) {
+                    hideAddTeacherModal();
+                }
+            });
+        }
+        
+        // 显示认证页面
+        function showAuthPage(role) {
+            loginPage.style.display = 'none';
+            bookingSystem.style.display = 'none';
+            
+            if (role === 'admin') {
+                adminAuth.style.display = 'block';
+                studentAuth.style.display = 'none';
+                teacherAuth.style.display = 'none';
+            } else if (role === 'student') {
+                adminAuth.style.display = 'none';
+                studentAuth.style.display = 'block';
+                teacherAuth.style.display = 'none';
+            } else if (role === 'teacher') {
+                adminAuth.style.display = 'none';
+                studentAuth.style.display = 'none';
+                teacherAuth.style.display = 'block';
+            }
+        }
+        
+        // 显示登录页面
+        function showLoginPage() {
+            loginPage.style.display = 'block';
+            adminAuth.style.display = 'none';
+            studentAuth.style.display = 'none';
+            teacherAuth.style.display = 'none';
+            bookingSystem.style.display = 'none';
+        }
+        
+        // 显示预约系统
+        function showBookingSystem() {
+            loginPage.style.display = 'none';
+            adminAuth.style.display = 'none';
+            studentAuth.style.display = 'none';
+            teacherAuth.style.display = 'none';
+            bookingSystem.style.display = 'block';
+            
+            // 根据用户角色设置界面
+            if (currentUser.role === 'admin') {
+                userRole.textContent = '管理员';
+                editTeacherInfo.style.display = 'block';
+                selectTeacherInstruction.textContent = '选择您要预约的教师（点击教师卡片选择）';
+                teacherSectionTitle.textContent = '选择教师';
+                studentLimitInfo.style.display = 'none';
+                dailyLimitInfo.style.display = 'none';
+                addTeacherBtn.style.display = 'block';
+            } else if (currentUser.role === 'student') {
+                userRole.textContent = '学员';
+                editTeacherInfo.style.display = 'none';
+                selectTeacherInstruction.textContent = '选择您要预约的教师（点击教师卡片选择）';
+                teacherSectionTitle.textContent = '选择教师';
+                studentLimitInfo.style.display = 'block';
+                dailyLimitInfo.style.display = 'block';
+                addTeacherBtn.style.display = 'none';
+                updateDailyLimitInfo();
+            } else if (currentUser.role === 'teacher') {
+                userRole.textContent = '教练';
+                editTeacherInfo.style.display = 'none';
+                selectTeacherInstruction.textContent = '您只能预约自己的时间段';
+                teacherSectionTitle.textContent = '我的信息';
+                studentLimitInfo.style.display = 'none';
+                dailyLimitInfo.style.display = 'none';
+                addTeacherBtn.style.display = 'none';
+            }
+            
+            userName.textContent = currentUser.username;
+            
+            // 初始化预约系统
+            renderTeachers();
+            renderTimeSlots();
+            updateSelectedDate();
+            updateBookingSummary();
+            renderBookings();
+        }
+        
+        // 更新学员每日预约限制信息
+        function updateDailyLimitInfo() {
+            if (currentUser.role !== 'student') return;
+            
+            const dateString = formatDate(selectedDate);
+            const userBookings = getUserBookings();
+            const currentUserBookings = userBookings[currentUser.username] || [];
+            
+            // 计算今日已预约时长
+            let todayBooked = 0;
+            currentUserBookings.forEach(booking => {
+                const bookingDate = formatDate(new Date(booking.date));
+                if (bookingDate === dateString) {
+                    todayBooked += booking.duration;
+                }
+            });
+            
+            const remaining = 2 - todayBooked;
+            
+            todayBookedHours.textContent = todayBooked;
+            remainingHours.textContent = remaining > 0 ? remaining : 0;
+        }
+        
+        // 检查学员是否超过每日预约限制
+        function checkStudentDailyLimit() {
+            if (currentUser.role !== 'student') return true;
+            
+            const dateString = formatDate(selectedDate);
+            const userBookings = getUserBookings();
+            const currentUserBookings = userBookings[currentUser.username] || [];
+            
+            // 计算今日已预约时长
+            let todayBooked = 0;
+            currentUserBookings.forEach(booking => {
+                const bookingDate = formatDate(new Date(booking.date));
+                if (bookingDate === dateString) {
+                    todayBooked += booking.duration;
+                }
+            });
+            
+            // 计算当前选择的时长
+            const selectedDuration = selectedSlots.length * 0.5;
+            
+            return (todayBooked + selectedDuration) <= 2;
+        }
+        
+        // 切换认证标签
+        function switchAuthTab(authContainer, tabType) {
+            // 更新标签状态
+            const tabs = authContainer.querySelectorAll('.auth-tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            authContainer.querySelector(`.auth-tab[data-tab="${tabType}"]`).classList.add('active');
+            
+            // 显示对应的表单
+            const loginForm = authContainer.querySelector('.auth-form:first-of-type');
+            const registerForm = authContainer.querySelector('.auth-form:nth-of-type(2)');
+            const resetForm = authContainer.querySelector('.auth-form:last-of-type');
+            
+            if (tabType === 'login') {
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+                resetForm.style.display = 'none';
+            } else if (tabType === 'register') {
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+                resetForm.style.display = 'none';
+            } else {
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'none';
+                resetForm.style.display = 'block';
+            }
+            
+            // 清空消息
+            const message = authContainer.querySelector('.message');
+            message.style.display = 'none';
+            message.textContent = '';
+        }
+        
+        // 设置表单处理程序
+        function setupFormHandlers() {
+            // 管理员表单
+            document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('adminUsername').value;
+                const password = document.getElementById('adminPassword').value;
+                loginUser('admin', username, password);
+            });
+            
+            document.getElementById('adminRegisterForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('adminRegUsername').value;
+                const password = document.getElementById('adminRegPassword').value;
+                const confirmPassword = document.getElementById('adminConfirmPassword').value;
+                const phone = document.getElementById('adminPhone').value;
+                registerUser('admin', username, password, confirmPassword, phone);
+            });
+            
+            document.getElementById('adminResetForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('adminResetUsername').value;
+                const phone = document.getElementById('adminResetPhone').value;
+                const newPassword = document.getElementById('adminNewPassword').value;
+                const confirmNewPassword = document.getElementById('adminConfirmNewPassword').value;
+                resetPassword('admin', username, phone, newPassword, confirmNewPassword);
+            });
+            
+            // 学员表单
+            document.getElementById('studentLoginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('studentUsername').value;
+                const password = document.getElementById('studentPassword').value;
+                loginUser('student', username, password);
+            });
+            
+            document.getElementById('studentRegisterForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('studentRegUsername').value;
+                const password = document.getElementById('studentRegPassword').value;
+                const confirmPassword = document.getElementById('studentConfirmPassword').value;
+                const phone = document.getElementById('studentPhone').value;
+                registerUser('student', username, password, confirmPassword, phone);
+            });
+            
+            document.getElementById('studentResetForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('studentResetUsername').value;
+                const phone = document.getElementById('studentResetPhone').value;
+                const newPassword = document.getElementById('studentNewPassword').value;
+                const confirmNewPassword = document.getElementById('studentConfirmNewPassword').value;
+                resetPassword('student', username, phone, newPassword, confirmNewPassword);
+            });
+            
+            // 教练表单
+            document.getElementById('teacherLoginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('teacherUsername').value;
+                const password = document.getElementById('teacherPassword').value;
+                loginUser('teacher', username, password);
+            });
+            
+            document.getElementById('teacherRegisterForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('teacherRegUsername').value;
+                const password = document.getElementById('teacherRegPassword').value;
+                const confirmPassword = document.getElementById('teacherConfirmPassword').value;
+                const phone = document.getElementById('teacherPhone').value;
+                const subject = document.getElementById('teacherSubject').value;
+                const gender = document.getElementById('teacherGender').value;
+                const note = document.getElementById('teacherNote').value;
+                registerTeacher(username, password, confirmPassword, phone, subject, gender, note);
+            });
+            
+            document.getElementById('teacherResetForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('teacherResetUsername').value;
+                const phone = document.getElementById('teacherResetPhone').value;
+                const newPassword = document.getElementById('teacherNewPassword').value;
+                const confirmNewPassword = document.getElementById('teacherConfirmNewPassword').value;
+                resetPassword('teacher', username, phone, newPassword, confirmNewPassword);
+            });
+        }
+        
+        // 用户登录
+        function loginUser(role, username, password) {
+            const users = JSON.parse(localStorage.getItem(`${role}Users`));
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            const messageElement = document.getElementById(`${role}Message`);
+            
+            if (user) {
+                currentUser = { role, username };
+                showMessage(messageElement, `登录成功！欢迎 ${username}`, 'success');
+                
+                // 登录后进入预约系统
+                setTimeout(() => {
+                    showBookingSystem();
+                }, 1000);
+            } else {
+                showMessage(messageElement, '账户或密码错误，请重试', 'error');
+            }
+        }
+        
+        // 用户注册
+        function registerUser(role, username, password, confirmPassword, phone) {
+            const messageElement = document.getElementById(`${role}Message`);
+            
+            // 验证密码是否匹配
+            if (password !== confirmPassword) {
+                showMessage(messageElement, '两次输入的密码不一致', 'error');
+                return;
+            }
+            
+            // 验证密码长度
+            if (password.length < 6) {
+                showMessage(messageElement, '密码长度至少为6位', 'error');
+                return;
+            }
+            
+            // 验证手机号码格式
+            if (!/^1[3-9]\d{9}$/.test(phone)) {
+                showMessage(messageElement, '请输入有效的手机号码', 'error');
+                return;
+            }
+            
+            const users = JSON.parse(localStorage.getItem(`${role}Users`));
+            
+            // 检查用户名是否已存在
+            if (users.some(u => u.username === username)) {
+                showMessage(messageElement, '该账户名已被使用，请选择其他账户名', 'error');
+                return;
+            }
+            
+            // 检查手机号码是否已存在
+            if (users.some(u => u.phone === phone)) {
+                showMessage(messageElement, '该手机号码已被使用，请使用其他手机号码', 'error');
+                return;
+            }
+            
+            // 添加新用户
+            users.push({ username, password, phone });
+            localStorage.setItem(`${role}Users`, JSON.stringify(users));
+            
+            showMessage(messageElement, '注册成功！请使用新账户登录', 'success');
+            
+            // 切换到登录标签
+            const authContainer = document.getElementById(`${role}Auth`);
+            switchAuthTab(authContainer, 'login');
+            
+            // 清空注册表单
+            const registerForm = authContainer.querySelector('.auth-form:nth-of-type(2)');
+            registerForm.reset();
+        }
+        
+        // 教练注册（自动添加到教师列表）
+        function registerTeacher(username, password, confirmPassword, phone, subject, gender, note) {
+            const messageElement = document.getElementById('teacherMessage');
+            
+            // 验证密码是否匹配
+            if (password !== confirmPassword) {
+                showMessage(messageElement, '两次输入的密码不一致', 'error');
+                return;
+            }
+            
+            // 验证密码长度
+            if (password.length < 6) {
+                showMessage(messageElement, '密码长度至少为6位', 'error');
+                return;
+            }
+            
+            // 验证手机号码格式
+            if (!/^1[3-9]\d{9}$/.test(phone)) {
+                showMessage(messageElement, '请输入有效的手机号码', 'error');
+                return;
+            }
+            
+            // 验证必填字段
+            if (!subject || !gender) {
+                showMessage(messageElement, '请填写所有必填字段', 'error');
+                return;
+            }
+            
+            const users = JSON.parse(localStorage.getItem('teacherUsers'));
+            
+            // 检查用户名是否已存在
+            if (users.some(u => u.username === username)) {
+                showMessage(messageElement, '该账户名已被使用，请选择其他账户名', 'error');
+                return;
+            }
+            
+            // 检查手机号码是否已存在
+            if (users.some(u => u.phone === phone)) {
+                showMessage(messageElement, '该手机号码已被使用，请使用其他手机号码', 'error');
+                return;
+            }
+            
+            // 添加新教练用户
+            users.push({ username, password, phone });
+            localStorage.setItem('teacherUsers', JSON.stringify(users));
+            
+            // 将教练添加到教师列表
+            const teachers = getTeachers();
+            const newTeacher = {
+                id: generateTeacherId(),
+                name: username,
+                subject: subject,
+                note: note || '暂无备注',
+                gender: gender
+            };
+            teachers.push(newTeacher);
+            saveTeachers(teachers);
+            
+            showMessage(messageElement, '注册成功！您的账户已自动添加到教师列表', 'success');
+            
+            // 切换到登录标签
+            const authContainer = document.getElementById('teacherAuth');
+            switchAuthTab(authContainer, 'login');
+            
+            // 清空注册表单
+            const registerForm = authContainer.querySelector('.auth-form:nth-of-type(2)');
+            registerForm.reset();
+        }
+        
+        // 重置密码
+        function resetPassword(role, username, phone, newPassword, confirmNewPassword) {
+            const messageElement = document.getElementById(`${role}Message`);
+            
+            // 验证密码是否匹配
+            if (newPassword !== confirmNewPassword) {
+                showMessage(messageElement, '两次输入的密码不一致', 'error');
+                return;
+            }
+            
+            // 验证密码长度
+            if (newPassword.length < 6) {
+                showMessage(messageElement, '密码长度至少为6位', 'error');
+                return;
+            }
+            
+            const users = JSON.parse(localStorage.getItem(`${role}Users`));
+            const userIndex = users.findIndex(u => u.username === username);
+            
+            if (userIndex === -1) {
+                showMessage(messageElement, '账户不存在', 'error');
+                return;
+            }
+            
+            // 验证手机号码
+            if (users[userIndex].phone !== phone) {
+                showMessage(messageElement, '手机号码不正确，无法重置密码', 'error');
+                return;
+            }
+            
+            // 更新密码
+            users[userIndex].password = newPassword;
+            localStorage.setItem(`${role}Users`, JSON.stringify(users));
+            
+            showMessage(messageElement, '密码重置成功！请使用新密码登录', 'success');
+            
+            // 切换到登录标签
+            const authContainer = document.getElementById(`${role}Auth`);
+            switchAuthTab(authContainer, 'login');
+            
+            // 清空重置密码表单
+            const resetForm = authContainer.querySelector('.auth-form:last-of-type');
+            resetForm.reset();
         }
         
         // 退出登录
-        logoutBtn.addEventListener('click', function() {
-            bookingSystem.style.display = 'none';
-            loginPage.style.display = 'block';
-        });
-        
-        // 初始化预约系统
-        function initializeBookingSystem() {
-            // 初始化教练列表
-            initializeTeachers();
-            
-            // 初始化时间槽
-            initializeTimeSlots();
-            
-            // 初始化预约记录
-            initializeBookings();
+        function logout() {
+            currentUser = null;
+            showLoginPage();
         }
         
-        // 初始化教练列表
-        function initializeTeachers() {
-            const teachersList = document.getElementById('teachersList');
-            teachersList.innerHTML = '';
+        // 显示消息
+        function showMessage(element, text, type) {
+            element.textContent = text;
+            element.className = `message ${type}`;
+            element.style.display = 'block';
             
-            const teachers = [
-                { id: 1, name: '张教练', subject: '枪法训练', note: '擅长AK/M4', gender: 'male' },
-                { id: 2, name: '李教练', subject: '战术指导', note: '擅长团队配合', gender: 'male' },
-                { id: 3, name: '王教练', subject: '狙击训练', note: 'AWP专家', gender: 'male' },
-                { id: 4, name: '赵教练', subject: '地图理解', note: '精通所有地图', gender: 'male' },
-                { id: 5, name: '刘教练', subject: '心理素质', note: '比赛心态调整', gender: 'female' },
-                { id: 6, name: '陈教练', subject: '综合训练', note: '全方位提升', gender: 'male' }
-            ];
-            
-            teachers.forEach(teacher => {
-                const teacherCard = document.createElement('div');
-                teacherCard.className = 'teacher-card';
-                teacherCard.setAttribute('data-teacher-id', teacher.id);
-                
-                teacherCard.innerHTML = `
-                    <div class="teacher-avatar ${teacher.gender}">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="teacher-name">${teacher.name}</div>
-                    <div class="teacher-subject">${teacher.subject}</div>
-                    <div class="teacher-note">${teacher.note}</div>
-                    <div class="edit-icon"><i class="fas fa-edit"></i></div>
-                `;
-                
-                teacherCard.addEventListener('click', function() {
-                    if (!this.classList.contains('disabled')) {
-                        document.querySelectorAll('.teacher-card').forEach(card => {
-                            card.classList.remove('selected');
-                        });
-                        this.classList.add('selected');
-                        
-                        // 更新选择的教练信息
-                        document.getElementById('selectedTeacherName').textContent = teacher.name;
-                        document.getElementById('modalTeacherName').textContent = teacher.name;
-                        document.getElementById('cancelTeacherName').textContent = teacher.name;
-                        
-                        // 更新课程费用
-                        const fee = Math.floor(Math.random() * 100) + 50;
-                        document.getElementById('courseFee').textContent = fee;
-                        document.getElementById('modalCourseFee').textContent = fee;
-                        
-                        // 检查是否可以启用确认按钮
-                        checkBookingStatus();
-                    }
-                });
-                
-                teachersList.appendChild(teacherCard);
-            });
+            // 3秒后自动隐藏消息
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 3000);
         }
         
-        // 初始化时间槽
-        function initializeTimeSlots() {
-            const timeSlots = document.getElementById('timeSlots');
-            timeSlots.innerHTML = '';
-            
-            const timeRanges = [
-                '09:00-10:00', '10:00-11:00', '11:00-12:00', '12:00-13:00',
-                '13:00-14:00', '14:00-15:00', '15:00-16:00', '16:00-17:00',
-                '17:00-18:00', '18:00-19:00', '19:00-20:00', '20:00-21:00'
-            ];
-            
-            // 随机生成一些已预约和不可用的时间槽
-            const bookedSlots = [2, 5, 8];
-            const unavailableSlots = [1, 7, 11];
-            
-            timeRanges.forEach((time, index) => {
-                const timeSlot = document.createElement('div');
-                let className = 'time-slot';
-                let studentName = '';
-                
-                if (bookedSlots.includes(index)) {
-                    className += ' booked';
-                    studentName = '已预约';
-                } else if (unavailableSlots.includes(index)) {
-                    className += ' unavailable';
-                    studentName = '不可用';
-                }
-                
-                timeSlot.className = className;
-                timeSlot.innerHTML = `
-                    <div class="time-text">${time}</div>
-                    <div class="student-name">${studentName}</div>
-                `;
-                
-                if (!bookedSlots.includes(index) && !unavailableSlots.includes(index)) {
-                    timeSlot.addEventListener('click', function() {
-                        document.querySelectorAll('.time-slot').forEach(slot => {
-                            slot.classList.remove('selected');
-                        });
-                        this.classList.add('selected');
-                        
-                        // 更新选择的时间信息
-                        document.getElementById('selectedTimeSlot').textContent = time;
-                        document.getElementById('modalTimeSlot').textContent = time;
-                        document.getElementById('cancelTimeSlot').textContent = time;
-                        
-                        // 检查是否可以启用确认按钮
-                        checkBookingStatus();
-                    });
-                }
-                
-                timeSlots.appendChild(timeSlot);
-            });
-        }
-        
-        // 初始化预约记录
-        function initializeBookings() {
-            const bookingsList = document.getElementById('bookingsList');
-            bookingsList.innerHTML = '';
-            
-            const bookings = [
-                { id: 1, teacher: '张教练', time: '2023-11-15 14:00-15:00', status: '已确认' },
-                { id: 2, teacher: '李教练', time: '2023-11-16 16:00-17:00', status: '已确认' },
-                { id: 3, teacher: '王教练', time: '2023-11-17 19:00-20:00', status: '待确认' }
-            ];
-            
-            bookings.forEach(booking => {
-                const bookingItem = document.createElement('div');
-                bookingItem.className = 'booking-item';
-                bookingItem.setAttribute('data-booking-id', booking.id);
-                
-                bookingItem.innerHTML = `
-                    <div class="booking-info">
-                        <div class="booking-teacher">${booking.teacher}</div>
-                        <div class="booking-time">${booking.time} - ${booking.status}</div>
-                    </div>
-                    <button class="cancel-btn">取消预约</button>
-                `;
-                
-                bookingItem.querySelector('.cancel-btn').addEventListener('click', function() {
-                    document.getElementById('cancelTeacherName').textContent = booking.teacher;
-                    document.getElementById('cancelTimeSlot').textContent = booking.time;
-                    document.getElementById('cancelModal').style.display = 'flex';
-                    
-                    // 设置取消预约的最终确认
-                    document.getElementById('finalCancelBtn').onclick = function() {
-                        bookingItem.remove();
-                        document.getElementById('cancelModal').style.display = 'none';
-                        
-                        // 更新已预约数量
-                        const bookedCount = document.querySelectorAll('.booking-item').length;
-                        document.getElementById('bookedCount').textContent = bookedCount;
-                    };
-                });
-                
-                bookingsList.appendChild(bookingItem);
-            });
-            
-            // 更新已预约数量
-            document.getElementById('bookedCount').textContent = bookings.length;
-        }
-        
-        // 检查预约状态
-        function checkBookingStatus() {
-            const teacherSelected = document.querySelector('.teacher-card.selected');
-            const timeSelected = document.querySelector('.time-slot.selected');
-            const confirmBtn = document.getElementById('confirmBookingBtn');
-            
-            if (teacherSelected && timeSelected) {
-                confirmBtn.disabled = false;
-            } else {
-                confirmBtn.disabled = true;
-            }
-        }
-        
-        // 确认预约按钮
-        document.getElementById('confirmBookingBtn').addEventListener('click', function() {
-            document.getElementById('confirmModal').style.display = 'flex';
-        });
-        
-        // 取消确认按钮
-        document.getElementById('cancelConfirmBtn').addEventListener('click', function() {
-            document.getElementById('confirmModal').style.display = 'none';
-        });
-        
-        // 最终确认预约按钮
-        document.getElementById('finalConfirmBtn').addEventListener('click', function() {
-            document.getElementById('confirmModal').style.display = 'none';
-            
-            // 显示成功消息
-            const successMessage = document.getElementById('bookingSuccessMessage');
+        // 显示成功消息
+        function showSuccessMessage(message) {
+            successMessage.textContent = message;
             successMessage.style.display = 'block';
-            
-            // 重置选择
-            document.querySelectorAll('.teacher-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-            document.querySelectorAll('.time-slot').forEach(slot => {
-                slot.classList.remove('selected');
-            });
-            
-            document.getElementById('selectedTeacherName').textContent = '未选择';
-            document.getElementById('selectedTimeSlot').textContent = '未选择';
-            document.getElementById('courseFee').textContent = '0';
-            
-            // 禁用确认按钮
-            document.getElementById('confirmBookingBtn').disabled = true;
-            
-            // 3秒后隐藏成功消息
             setTimeout(() => {
                 successMessage.style.display = 'none';
             }, 3000);
-        });
+        }
         
-        // 取消预约模态框按钮
-        document.getElementById('cancelCancelBtn').addEventListener('click', function() {
-            document.getElementById('cancelModal').style.display = 'none';
-        });
-        
-        // 添加教练按钮
-        document.getElementById('addTeacherBtn').addEventListener('click', function() {
-            document.getElementById('addTeacherModal').style.display = 'flex';
-        });
-        
-        // 取消添加教练按钮
-        document.getElementById('cancelAddTeacherBtn').addEventListener('click', function() {
-            document.getElementById('addTeacherModal').style.display = 'none';
-        });
-        
-        // 确认添加教练按钮
-        document.getElementById('confirmAddTeacherBtn').addEventListener('click', function() {
-            const name = document.getElementById('newTeacherName').value;
-            const subject = document.getElementById('newTeacherSubject').value;
-            const note = document.getElementById('newTeacherNote').value;
-            const gender = document.getElementById('newTeacherGender').checked ? 'male' : 'female';
-            
-            if (name && subject) {
-                // 在实际应用中，这里应该发送数据到服务器
-                // 这里只是模拟添加教练
-                alert(`教练 ${name} 添加成功！`);
-                document.getElementById('addTeacherModal').style.display = 'none';
-                
-                // 重置表单
-                document.getElementById('newTeacherName').value = '';
-                document.getElementById('newTeacherSubject').value = '';
-                document.getElementById('newTeacherNote').value = '';
-                document.getElementById('newTeacherGender').checked = true;
-            } else {
-                alert('请填写教练姓名和专长科目！');
+        // 获取角色名称
+        function getRoleName(role) {
+            switch(role) {
+                case 'admin': return '管理员';
+                case 'student': return '学员';
+                case 'teacher': return '教练';
+                default: return '用户';
             }
-        });
+        }
         
-        // 日历导航
-        document.getElementById('prevMonth').addEventListener('click', function() {
-            // 在实际应用中，这里应该更新日历
-            alert('切换到上一个月');
-        });
+        // 设置预约系统
+        function setupBookingSystem() {
+            // 事件监听
+            prevDayBtn.addEventListener('click', goToPrevDay);
+            nextDayBtn.addEventListener('click', goToNextDay);
+            confirmBtn.addEventListener('click', showConfirmModal);
+            cancelConfirm.addEventListener('click', hideConfirmModal);
+            finalConfirm.addEventListener('click', confirmBooking);
+            
+            // 教练/管理员预约模态框事件
+            cancelTeacherBooking.addEventListener('click', hideTeacherBookingModal);
+            confirmTeacherBooking.addEventListener('click', confirmTeacherBookingAction);
+            
+            // 编辑教师表单事件
+            teacherForm.addEventListener('submit', saveTeacherInfo);
+            cancelEdit.addEventListener('click', hideEditTeacherModal);
+        }
         
-        document.getElementById('nextMonth').addEventListener('click', function() {
-            // 在实际应用中，这里应该更新日历
-            alert('切换到下一个月');
-        });
+        // 渲染教师列表
+        function renderTeachers() {
+            teachersListEl.innerHTML = '';
+            const teachers = getTeachers();
+            
+            // 教练只能看到自己的信息
+            if (currentUser.role === 'teacher') {
+                const currentTeacher = teachers.find(t => t.name === currentUser.username);
+                if (currentTeacher) {
+                    renderTeacherCard(currentTeacher, true);
+                    // 自动选择自己的教师卡片
+                    selectTeacher(currentTeacher);
+                }
+                return;
+            }
+            
+            // 管理员和学员可以看到所有教师
+            teachers.forEach(teacher => {
+                renderTeacherCard(teacher, false);
+            });
+        }
         
-        document.getElementById('todayBtn').addEventListener('click', function() {
-            // 在实际应用中，这里应该跳转到今天
-            alert('跳转到今天');
-        });
+        // 渲染教师卡片
+        function renderTeacherCard(teacher, isCurrentTeacher) {
+            const teacherCard = document.createElement('div');
+            
+            if (isCurrentTeacher) {
+                teacherCard.className = 'teacher-card selected';
+            } else if (currentUser.role === 'teacher') {
+                teacherCard.className = 'teacher-card disabled';
+            } else {
+                teacherCard.className = 'teacher-card';
+            }
+            
+            // 管理员可以编辑教师信息，学员和教练只能查看
+            if (currentUser.role === 'admin') {
+                teacherCard.innerHTML = `
+                    <div class="teacher-avatar ${teacher.gender}" data-id="${teacher.id}">
+                        ${teacher.gender === 'male' ? '<i class="fas fa-mars"></i>' : '<i class="fas fa-venus"></i>'}
+                    </div>
+                    <div class="teacher-name">${teacher.name}</div>
+                    <div class="teacher-subject">${teacher.subject}</div>
+                    <div class="teacher-note">${teacher.note || '暂无备注'}</div>
+                    <div class="edit-icon"><i class="fas fa-edit"></i></div>
+                `;
+                
+                // 点击教师头像或编辑图标编辑教师信息
+                const avatar = teacherCard.querySelector('.teacher-avatar');
+                const editIcon = teacherCard.querySelector('.edit-icon');
+                
+                avatar.addEventListener('click', () => editTeacher(teacher));
+                editIcon.addEventListener('click', () => editTeacher(teacher));
+            } else {
+                teacherCard.innerHTML = `
+                    <div class="teacher-avatar ${teacher.gender}">
+                        ${teacher.gender === 'male' ? '<i class="fas fa-mars"></i>' : '<i class="fas fa-venus"></i>'}
+                    </div>
+                    <div class="teacher-name">${teacher.name}</div>
+                    <div class="teacher-subject">${teacher.subject}</div>
+                    <div class="teacher-note">${teacher.note || '暂无备注'}</div>
+                `;
+            }
+            
+            // 教练只能点击自己的卡片，管理员和学员可以点击所有卡片
+            if (currentUser.role !== 'teacher' || isCurrentTeacher) {
+                // 点击教师卡片选择教师
+                teacherCard.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('edit-icon') &&
+                        !e.target.classList.contains('fa-edit') &&
+                        !e.target.classList.contains('teacher-avatar')) {
+                        selectTeacher(teacher);
+                    }
+                });
+            }
+            
+            teachersListEl.appendChild(teacherCard);
+        }
+        
+        // 选择教师
+        function selectTeacher(teacher) {
+            // 教练只能选择自己
+            if (currentUser.role === 'teacher' && teacher.name !== currentUser.username) {
+                return;
+            }
+            
+            // 移除之前选中的教师
+            document.querySelectorAll('.teacher-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // 选中当前教师
+            event.currentTarget.classList.add('selected');
+            selectedTeacher = teacher;
+            updateBookingSummary();
+            renderTimeSlots(); // 重新渲染时间槽以更新占用状态
+        }
+        
+        // 编辑教师信息
+        function editTeacher(teacher) {
+            // 只有管理员可以编辑教师信息
+            if (currentUser.role !== 'admin') return;
+            
+            editingTeacher = teacher;
+            teacherNameInput.value = teacher.name;
+            teacherSubjectInput.value = teacher.subject;
+            teacherNoteInput.value = teacher.note || '';
+            editTeacherModal.style.display = 'flex';
+        }
+        
+        // 保存教师信息
+        function saveTeacherInfo(e) {
+            e.preventDefault();
+            
+            if (!editingTeacher || currentUser.role !== 'admin') return;
+            
+            // 更新教师信息
+            const teachers = getTeachers();
+            const teacherIndex = teachers.findIndex(t => t.id === editingTeacher.id);
+            
+            if (teacherIndex !== -1) {
+                teachers[teacherIndex].name = teacherNameInput.value;
+                teachers[teacherIndex].subject = teacherSubjectInput.value;
+                teachers[teacherIndex].note = teacherNoteInput.value;
+                
+                saveTeachers(teachers);
+                
+                // 更新UI
+                renderTeachers();
+                
+                // 如果当前选中的教师是正在编辑的教师，更新摘要
+                if (selectedTeacher && selectedTeacher.id === editingTeacher.id) {
+                    selectedTeacher = teachers[teacherIndex];
+                    updateBookingSummary();
+                }
+            }
+            
+            // 关闭模态框
+            hideEditTeacherModal();
+        }
+        
+        // 隐藏编辑教师模态框
+        function hideEditTeacherModal() {
+            editTeacherModal.style.display = 'none';
+            editingTeacher = null;
+        }
+        
+        // 显示删除教师确认模态框
+        function showDeleteTeacherModal() {
+            if (!editingTeacher || currentUser.role !== 'admin') return;
+            
+            deleteTeacherName.textContent = editingTeacher.name;
+            deleteTeacherSubject.textContent = editingTeacher.subject;
+            deleteTeacherModal.style.display = 'flex';
+        }
+        
+        // 隐藏删除教师模态框
+        function hideDeleteTeacherModal() {
+            deleteTeacherModal.style.display = 'none';
+        }
+        
+        // 删除教师
+        function deleteTeacher() {
+            if (!editingTeacher || currentUser.role !== 'admin') return;
+            
+            const teachers = getTeachers();
+            const teacherIndex = teachers.findIndex(t => t.id === editingTeacher.id);
+            
+            if (teacherIndex !== -1) {
+                // 从教师列表中移除
+                teachers.splice(teacherIndex, 1);
+                saveTeachers(teachers);
+                
+                // 删除该教师的所有预约记录
+                const bookedSlots = getBookedSlots();
+                const updatedBookedSlots = bookedSlots.filter(slot => slot.teacherId !== editingTeacher.id);
+                saveBookedSlots(updatedBookedSlots);
+                
+                // 从所有用户的预约记录中删除该教师的预约
+                const userBookings = getUserBookings();
+                for (const username in userBookings) {
+                    if (userBookings.hasOwnProperty(username)) {
+                        userBookings[username] = userBookings[username].filter(
+                            booking => booking.teacher.id !== editingTeacher.id
+                        );
+                    }
+                }
+                saveUserBookings(userBookings);
+                
+                // 更新UI
+                renderTeachers();
+                
+                // 如果当前选中的教师是正在删除的教师，清空选择
+                if (selectedTeacher && selectedTeacher.id === editingTeacher.id) {
+                    selectedTeacher = null;
+                    updateBookingSummary();
+                }
+                
+                // 显示成功消息
+                showSuccessMessage('教师已成功删除！');
+            }
+            
+            // 关闭模态框
+            hideDeleteTeacherModal();
+            hideEditTeacherModal();
+        }
+        
+        // 显示添加教师模态框
+        function showAddTeacherModal() {
+            if (currentUser.role !== 'admin') return;
+            
+            newTeacherName.value = '';
+            newTeacherSubject.value = '';
+            newTeacherGender.value = '';
+            newTeacherNote.value = '';
+            addTeacherModal.style.display = 'flex';
+        }
+        
+        // 隐藏添加教师模态框
+        function hideAddTeacherModal() {
+            addTeacherModal.style.display = 'none';
+        }
+        
+        // 添加教师
+        function addTeacher(e) {
+            e.preventDefault();
+            
+            if (currentUser.role !== 'admin') return;
+            
+            const name = newTeacherName.value.trim();
+            const subject = newTeacherSubject.value.trim();
+            const gender = newTeacherGender.value;
+            const note = newTeacherNote.value.trim();
+            
+            if (!name || !subject || !gender) {
+                alert('请填写所有必填字段！');
+                return;
+            }
+            
+            const teachers = getTeachers();
+            const newTeacher = {
+                id: generateTeacherId(),
+                name: name,
+                subject: subject,
+                note: note || '暂无备注',
+                gender: gender
+            };
+            
+            teachers.push(newTeacher);
+            saveTeachers(teachers);
+            
+            // 更新UI
+            renderTeachers();
+            
+            // 显示成功消息
+            showSuccessMessage('教师已成功添加！');
+            
+            // 关闭模态框
+            hideAddTeacherModal();
+        }
+        
+        // 渲染时间槽
+        function renderTimeSlots() {
+            timeSlotsEl.innerHTML = '';
+            const bookedSlots = getBookedSlots();
+            
+            // 生成从10:00到23:00的时间槽，每30分钟一个
+            const startHour = 10;
+            const endHour = 23;
+            
+            for (let hour = startHour; hour < endHour; hour++) {
+                for (let minute = 0; minute < 60; minute += 30) {
+                    const timeSlot = document.createElement('div');
+                    const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                    
+                    timeSlot.className = 'time-slot';
+                    timeSlot.innerHTML = `<div class="time-text">${timeString}</div>`;
+                    timeSlot.dataset.time = timeString;
+                    
+                    // 检查时间段是否已被预约
+                    const dateString = formatDate(selectedDate);
+                    const bookedSlot = bookedSlots.find(slot => 
+                        slot.teacherId === (selectedTeacher ? selectedTeacher.id : null) && 
+                        slot.date === dateString && 
+                        slot.time === timeString
+                    );
+                    
+                    if (bookedSlot) {
+                        if (bookedSlot.type === 'unavailable') {
+                            timeSlot.classList.add('unavailable');
+                            timeSlot.innerHTML += `<div class="student-name">不可预约</div>`;
+                        } else {
+                            timeSlot.classList.add('booked');
+                            timeSlot.innerHTML += `<div class="student-name">${bookedSlot.studentName}</div>`;
+                        }
+                    } else {
+                        timeSlot.addEventListener('click', () => selectTimeSlot(timeSlot));
+                    }
+                    
+                    // 如果时间段已被选中，添加选中样式
+                    if (selectedSlots.includes(timeString)) {
+                        timeSlot.classList.add('selected');
+                    }
+                    
+                    timeSlotsEl.appendChild(timeSlot);
+                }
+            }
+        }
+        
+        // 格式化日期为YYYY-MM-DD
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        // 选择时间槽
+        function selectTimeSlot(slot) {
+            if (slot.classList.contains('booked') || slot.classList.contains('unavailable') || slot.classList.contains('disabled')) return;
+            
+            const time = slot.dataset.time;
+            const slotIndex = selectedSlots.indexOf(time);
+            
+            if (slotIndex === -1) {
+                // 如果选择的时间槽超过2个，先清空
+                if (selectedSlots.length >= 2) {
+                    clearSelectedSlots();
+                }
+                
+                // 添加新的时间槽
+                selectedSlots.push(time);
+                slot.classList.add('selected');
+                
+                // 如果选择了两个时间槽，检查是否连续
+                if (selectedSlots.length === 2) {
+                    if (!areSlotsConsecutive(selectedSlots[0], selectedSlots[1])) {
+                        // 如果不连续，只保留当前选择
+                        clearSelectedSlots();
+                        selectedSlots.push(time);
+                        slot.classList.add('selected');
+                    }
+                }
+            } else {
+                // 取消选择
+                selectedSlots.splice(slotIndex, 1);
+                slot.classList.remove('selected');
+            }
+            
+            // 排序选择的时间槽
+            selectedSlots.sort();
+            
+            updateBookingSummary();
+        }
+        
+        // 清空已选择的时间槽
+        function clearSelectedSlots() {
+            selectedSlots.forEach(time => {
+                const slot = document.querySelector(`.time-slot[data-time="${time}"]`);
+                if (slot) slot.classList.remove('selected');
+            });
+            selectedSlots = [];
+        }
+        
+        // 检查两个时间槽是否连续
+        function areSlotsConsecutive(time1, time2) {
+            const [hour1, minute1] = time1.split(':').map(Number);
+            const [hour2, minute2] = time2.split(':').map(Number);
+            
+            // 计算时间差（分钟）
+            const diff = (hour2 * 60 + minute2) - (hour1 * 60 + minute1);
+            
+            // 时间差必须是30分钟或60分钟
+            return diff === 30 || diff === 60;
+        }
+        
+        // 更新选中的日期显示
+        function updateSelectedDate() {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            currentDateEl.textContent = selectedDate.toLocaleDateString('zh-CN', options);
+            
+            // 更新学员每日预约限制信息
+            if (currentUser.role === 'student') {
+                updateDailyLimitInfo();
+            }
+        }
+        
+        // 更新预约摘要
+        function updateBookingSummary() {
+            // 更新教师
+            selectedTeacherEl.textContent = selectedTeacher ? selectedTeacher.name : '未选择';
+            
+            // 更新日期
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            selectedDateEl.textContent = selectedDate.toLocaleDateString('zh-CN', options);
+            
+            // 更新时间
+            if (selectedSlots.length === 0) {
+                selectedTimeEl.textContent = '未选择';
+                selectedDurationEl.textContent = '0 小时';
+            } else if (selectedSlots.length === 1) {
+                selectedTimeEl.textContent = selectedSlots[0];
+                selectedDurationEl.textContent = '0.5 小时';
+            } else {
+                selectedTimeEl.textContent = `${selectedSlots[0]} - ${selectedSlots[1]}`;
+                const duration = (selectedSlots.length * 0.5) - 0.5;
+                selectedDurationEl.textContent = `${duration} 小时`;
+            }
+            
+            // 更新确认按钮状态
+            confirmBtn.disabled = !(selectedTeacher && selectedSlots.length > 0);
+        }
+        
+        // 前往前一天
+        function goToPrevDay() {
+            selectedDate.setDate(selectedDate.getDate() - 1);
+            updateSelectedDate();
+            updateBookingSummary();
+            clearSelectedSlots();
+            renderTimeSlots(); // 重新渲染时间槽以更新占用状态
+        }
+        
+        // 前往后一天
+        function goToNextDay() {
+            selectedDate.setDate(selectedDate.getDate() + 1);
+            updateSelectedDate();
+            updateBookingSummary();
+            clearSelectedSlots();
+            renderTimeSlots(); // 重新渲染时间槽以更新占用状态
+        }
+        
+        // 显示确认预约模态框
+        function showConfirmModal() {
+            if (!selectedTeacher || selectedSlots.length === 0) return;
+            
+            // 检查学员每日预约限制
+            if (currentUser.role === 'student' && !checkStudentDailyLimit()) {
+                alert('您今天已预约满2小时，无法再预约更多课程！');
+                return;
+            }
+            
+            // 教练和管理员需要填写学生名称或标记为不可预约
+            if (currentUser.role === 'teacher' || currentUser.role === 'admin') {
+                showTeacherBookingModal();
+            } else {
+                // 学员直接确认预约
+                showStudentConfirmModal();
+            }
+        }
+        
+        // 显示学员确认预约模态框
+        function showStudentConfirmModal() {
+            confirmTeacherEl.textContent = selectedTeacher.name;
+            
+            const dateStr = selectedDate.toLocaleDateString('zh-CN');
+            const timeStr = selectedSlots.length === 1 ? 
+                selectedSlots[0] : 
+                `${selectedSlots[0]} - ${selectedSlots[1]}`;
+            confirmDateTimeEl.textContent = `${dateStr} ${timeStr}`;
+            
+            const duration = selectedSlots.length === 1 ? '0.5小时' : '1小时';
+            confirmDurationEl.textContent = duration;
+            
+            confirmModal.style.display = 'flex';
+        }
+        
+        // 显示教练/管理员预约模态框
+        function showTeacherBookingModal() {
+            teacherConfirmTeacherEl.textContent = selectedTeacher.name;
+            
+            const dateStr = selectedDate.toLocaleDateString('zh-CN');
+            const timeStr = selectedSlots.length === 1 ? 
+                selectedSlots[0] : 
+                `${selectedSlots[0]} - ${selectedSlots[1]}`;
+            teacherConfirmDateTimeEl.textContent = `${dateStr} ${timeStr}`;
+            
+            const duration = selectedSlots.length === 1 ? '0.5小时' : '1小时';
+            teacherConfirmDurationEl.textContent = duration;
+            
+            studentNameInput.value = '';
+            markUnavailableCheckbox.checked = false;
+            teacherBookingModal.style.display = 'flex';
+        }
+        
+        // 隐藏确认预约模态框
+        function hideConfirmModal() {
+            confirmModal.style.display = 'none';
+        }
+        
+        // 隐藏教练/管理员预约模态框
+        function hideTeacherBookingModal() {
+            teacherBookingModal.style.display = 'none';
+        }
+        
+        // 确认学员预约
+        function confirmBooking() {
+            // 创建预约对象
+            const booking = {
+                id: Date.now(),
+                teacher: selectedTeacher,
+                date: new Date(selectedDate),
+                slots: [...selectedSlots],
+                duration: selectedSlots.length * 0.5,
+                studentName: currentUser.username,
+                type: 'booked'
+            };
+            
+            // 添加到用户预约列表
+            const userBookings = getUserBookings();
+            if (!userBookings[currentUser.username]) {
+                userBookings[currentUser.username] = [];
+            }
+            userBookings[currentUser.username].push(booking);
+            saveUserBookings(userBookings);
+            
+            // 添加到已预约时间段
+            const bookedSlots = getBookedSlots();
+            const dateString = formatDate(selectedDate);
+            selectedSlots.forEach(slot => {
+                bookedSlots.push({
+                    teacherId: selectedTeacher.id,
+                    date: dateString,
+                    time: slot,
+                    studentName: currentUser.username,
+                    type: 'booked'
+                });
+            });
+            saveBookedSlots(bookedSlots);
+            
+            // 更新UI
+            renderBookings();
+            hideConfirmModal();
+            
+            // 显示成功消息
+            showSuccessMessage('预约成功！您可以在"我的预约"中查看详情。');
+            
+            // 重置选择
+            clearSelectedSlots();
+            document.querySelectorAll('.teacher-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            selectedTeacher = null;
+            updateBookingSummary();
+            renderTimeSlots(); // 重新渲染时间槽以更新占用状态
+            
+            // 更新学员每日预约限制信息
+            if (currentUser.role === 'student') {
+                updateDailyLimitInfo();
+            }
+        }
+        
+        // 确认教练/管理员预约
+        function confirmTeacherBookingAction() {
+            const studentName = studentNameInput.value.trim();
+            const markUnavailable = markUnavailableCheckbox.checked;
+            
+            if (!markUnavailable && !studentName) {
+                alert('请输入学生姓名！');
+                return;
+            }
+            
+            // 创建预约对象
+            const booking = {
+                id: Date.now(),
+                teacher: selectedTeacher,
+                date: new Date(selectedDate),
+                slots: [...selectedSlots],
+                duration: selectedSlots.length * 0.5,
+                studentName: markUnavailable ? '不可预约' : studentName,
+                type: markUnavailable ? 'unavailable' : 'booked'
+            };
+            
+            // 添加到用户预约列表
+            const userBookings = getUserBookings();
+            if (!userBookings[currentUser.username]) {
+                userBookings[currentUser.username] = [];
+            }
+            userBookings[currentUser.username].push(booking);
+            saveUserBookings(userBookings);
+            
+            // 添加到已预约时间段
+            const bookedSlots = getBookedSlots();
+            const dateString = formatDate(selectedDate);
+            selectedSlots.forEach(slot => {
+                bookedSlots.push({
+                    teacherId: selectedTeacher.id,
+                    date: dateString,
+                    time: slot,
+                    studentName: markUnavailable ? '不可预约' : studentName,
+                    type: markUnavailable ? 'unavailable' : 'booked'
+                });
+            });
+            saveBookedSlots(bookedSlots);
+            
+            // 更新UI
+            renderBookings();
+            hideTeacherBookingModal();
+            
+            // 显示成功消息
+            showSuccessMessage(markUnavailable ? '时间段已标记为不可预约！' : '预约成功！您可以在"我的预约"中查看详情。');
+            
+            // 重置选择
+            clearSelectedSlots();
+            document.querySelectorAll('.teacher-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            selectedTeacher = null;
+            updateBookingSummary();
+            renderTimeSlots(); // 重新渲染时间槽以更新占用状态
+        }
+        
+        // 渲染预约列表
+        function renderBookings() {
+            const userBookings = getUserBookings();
+            const currentUserBookings = userBookings[currentUser.username] || [];
+            
+            if (currentUserBookings.length === 0) {
+                bookingsListEl.innerHTML = '<div class="no-bookings">暂无预约记录</div>';
+                return;
+            }
+            
+            bookingsListEl.innerHTML = '';
+            
+            currentUserBookings.forEach(booking => {
+                const bookingItem = document.createElement('div');
+                bookingItem.className = 'booking-item';
+                
+                const dateStr = new Date(booking.date).toLocaleDateString('zh-CN');
+                const timeStr = booking.slots.length === 1 ? 
+                    booking.slots[0] : 
+                    `${booking.slots[0]} - ${booking.slots[1]}`;
+                
+                bookingItem.innerHTML = `
+                    <div class="booking-info">
+                        <div class="booking-teacher">${booking.teacher.name} - ${booking.teacher.subject}</div>
+                        <div class="booking-time">${dateStr} ${timeStr} (${booking.duration}小时)</div>
+                        ${currentUser.role === 'teacher' || currentUser.role === 'admin' ? 
+                            `<div class="booking-student">${booking.type === 'unavailable' ? '不可预约' : '学生：' + booking.studentName}</div>` : ''}
+                    </div>
+                    <button class="cancel-btn" data-id="${booking.id}">取消</button>
+                `;
+                
+                bookingsListEl.appendChild(bookingItem);
+            });
+            
+            // 添加取消按钮事件监听
+            document.querySelectorAll('.cancel-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.dataset.id);
+                    cancelBooking(id);
+                });
+            });
+        }
+        
+        // 取消预约
+        function cancelBooking(id) {
+            // 找到要取消的预约
+            const userBookings = getUserBookings();
+            const currentUserBookings = userBookings[currentUser.username] || [];
+            const bookingIndex = currentUserBookings.findIndex(booking => booking.id === id);
+            
+            if (bookingIndex === -1) return;
+            
+            const booking = currentUserBookings[bookingIndex];
+            
+            // 从已预约时间段中移除
+            const bookedSlots = getBookedSlots();
+            const dateString = formatDate(new Date(booking.date));
+            
+            booking.slots.forEach(slot => {
+                const bookedIndex = bookedSlots.findIndex(booked => 
+                    booked.teacherId === booking.teacher.id &&
+                    booked.date === dateString &&
+                    booked.time === slot &&
+                    booked.studentName === booking.studentName
+                );
+                
+                if (bookedIndex !== -1) {
+                    bookedSlots.splice(bookedIndex, 1);
+                }
+            });
+            saveBookedSlots(bookedSlots);
+            
+            // 从用户预约列表中移除
+            currentUserBookings.splice(bookingIndex, 1);
+            userBookings[currentUser.username] = currentUserBookings;
+            saveUserBookings(userBookings);
+            
+            // 更新UI
+            renderBookings();
+            renderTimeSlots(); // 重新渲染时间槽以更新占用状态
+            
+            // 更新学员每日预约限制信息
+            if (currentUser.role === 'student') {
+                updateDailyLimitInfo();
+            }
+            
+            // 显示取消成功消息
+            showSuccessMessage('预约已成功取消！');
+        }
+        
+        // 初始化应用
+        init();
     </script>
 </body>
 </html>
