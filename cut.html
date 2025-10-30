@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教练精彩锦集 - 雪花主题</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #626be8;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 淡紫色渐变背景 */
+        .galaxy-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(98, 107, 232, 0.9) 0%, rgba(80, 90, 220, 0.8) 50%, transparent 70%),
+                radial-gradient(circle at 80% 20%, rgba(120, 130, 250, 0.7) 0%, rgba(70, 80, 210, 0.6) 40%, transparent 70%),
+                radial-gradient(circle at 40% 80%, rgba(90, 100, 240, 0.8) 0%, rgba(60, 70, 200, 0.7) 50%, transparent 70%);
+            overflow: hidden;
+        }
+        
+        /* 雪花容器 */
+        .snowflakes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        /* 雪花基础样式 */
+        .snowflake {
+            position: absolute;
+            opacity: 0;
+        }
+        
+        /* 六角雪花样式 */
+        .snowflake.hexagon {
+            width: 20px;
+            height: 20px;
+            background: transparent;
+        }
+        
+        .snowflake.hexagon::before, 
+        .snowflake.hexagon::after {
+            content: '';
+            position: absolute;
+            background: white;
+            border-radius: 1px;
+        }
+        
+        .snowflake.hexagon::before {
+            width: 100%;
+            height: 4px;
+            top: 8px;
+            left: 0;
+        }
+        
+        .snowflake.hexagon::after {
+            width: 4px;
+            height: 100%;
+            top: 0;
+            left: 8px;
+        }
+        
+        .snowflake.hexagon .branch {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+        }
+        
+        .snowflake.hexagon .branch:nth-child(1) { top: 2px; left: 8px; }
+        .snowflake.hexagon .branch:nth-child(2) { top: 8px; left: 2px; }
+        .snowflake.hexagon .branch:nth-child(3) { top: 8px; left: 14px; }
+        .snowflake.hexagon .branch:nth-child(4) { top: 14px; left: 8px; }
+        
+        /* 八角雪花样式 */
+        .snowflake.octagon {
+            width: 24px;
+            height: 24px;
+            background: transparent;
+        }
+        
+        .snowflake.octagon::before, 
+        .snowflake.octagon::after,
+        .snowflake.octagon .diagonal1,
+        .snowflake.octagon .diagonal2 {
+            content: '';
+            position: absolute;
+            background: white;
+            border-radius: 1px;
+        }
+        
+        .snowflake.octagon::before {
+            width: 100%;
+            height: 3px;
+            top: 10px;
+            left: 0;
+        }
+        
+        .snowflake.octagon::after {
+            width: 3px;
+            height: 100%;
+            top: 0;
+            left: 10px;
+        }
+        
+        .snowflake.octagon .diagonal1 {
+            width: 3px;
+            height: 15px;
+            top: 4px;
+            left: 4px;
+            transform: rotate(45deg);
+        }
+        
+        .snowflake.octagon .diagonal2 {
+            width: 3px;
+            height: 15px;
+            top: 4px;
+            right: 4px;
+            transform: rotate(-45deg);
+        }
+        
+        /* 星形雪花样式 */
+        .snowflake.star {
+            width: 22px;
+            height: 22px;
+            background: transparent;
+        }
+        
+        .snowflake.star .point {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-color: white transparent transparent transparent;
+        }
+        
+        .snowflake.star .point:nth-child(1) { 
+            top: 0; left: 8px;
+            border-width: 0 4px 10px 4px;
+        }
+        .snowflake.star .point:nth-child(2) { 
+            top: 8px; right: 0;
+            border-width: 4px 0 4px 10px;
+        }
+        .snowflake.star .point:nth-child(3) { 
+            bottom: 0; left: 8px;
+            border-width: 10px 4px 0 4px;
+        }
+        .snowflake.star .point:nth-child(4) { 
+            top: 8px; left: 0;
+            border-width: 4px 10px 4px 0;
+        }
+        
+        /* 不同大小的雪花 */
+        .snowflake.small { transform: scale(0.7); }
+        .snowflake.medium { transform: scale(1); }
+        .snowflake.large { transform: scale(1.3); }
+        
+        /* 标题样式 */
+        .title {
+            text-align: center;
+            margin-bottom: 30px;
+            z-index: 10;
+        }
+        
+        .title h1 {
+            font-size: 3.2rem;
+            background: linear-gradient(to right, #ffffff, #c2c6ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.7);
+            margin-bottom: 15px;
+            letter-spacing: 3px;
+            font-weight: 700;
+        }
+        
+        .title p {
+            font-size: 1.4rem;
+            color: #e0e2ff;
+            letter-spacing: 2px;
+        }
+        
+        /* 环形图片容器 */
+        .map-ring {
+            position: relative;
+            width: 600px;
+            height: 600px;
+            margin: 0 auto;
+            z-index: 5;
+        }
+        
+        /* 图片项样式 */
+        .map-item {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid rgba(255, 255, 255, 0.7);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        .map-item:hover {
+            transform: scale(1.15);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+            z-index: 10;
+        }
+        
+        .map-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .map-item:hover img {
+            transform: scale(1.1);
+        }
+        
+        .map-name {
+            position: absolute;
+            bottom: -30px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 1.1rem;
+            color: #ffffff;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(0, 0, 0, 0.7);
+        }
+        
+        .map-item:hover .map-name {
+            opacity: 1;
+        }
+        
+        /* 视频展示框 */
+        .video-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 900px;
+            background: rgba(40, 45, 120, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            z-index: 100;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .video-modal.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            color: #ffffff;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            color: #c2c6ff;
+        }
+        
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 宽高比 */
+            background-color: #000;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .video-container video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .video-info {
+            margin-top: 15px;
+            color: #e0e2ff;
+            line-height: 1.5;
+        }
+        
+        /* 全屏视频播放 */
+        .video-fullscreen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .video-fullscreen.active {
+            display: flex;
+        }
+        
+        .video-fullscreen video {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 10px;
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.8);
+        }
+        
+        .close-fullscreen {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            color: #ffffff;
+            font-size: 2rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 201;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .close-fullscreen:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .map-ring {
+                width: 450px;
+                height: 450px;
+            }
+            
+            .map-item {
+                width: 90px;
+                height: 90px;
+            }
+            
+            .title h1 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 淡紫色渐变背景 -->
+    <div class="galaxy-bg"></div>
+    <div class="snowflakes" id="snowflakes"></div>
+    
+    <!-- 标题 -->
+    <div class="title">
+        <h1>教练精彩锦集</h1>
+        <p>点击图片查看教练精彩时刻</p>
+    </div>
+    
+    <!-- 环形图片 -->
+    <div class="map-ring" id="mapRing"></div>
+    
+    <!-- 视频展示框 -->
+    <div class="video-modal" id="videoModal">
+        <div class="modal-header">
+            <h2 class="modal-title" id="modalTitle">教练精彩时刻</h2>
+            <button class="close-btn" id="closeModal">&times;</button>
+        </div>
+        <div class="video-container">
+            <video id="modalVideo" controls>
+                <source src="" type="video/mp4">
+                您的浏览器不支持视频播放。
+            </video>
+        </div>
+        <div class="video-info" id="videoInfo">
+            <!-- 视频描述信息 -->
+        </div>
+    </div>
+    
+    <!-- 全屏视频 -->
+    <div class="video-fullscreen" id="videoFullscreen">
+        <button class="close-fullscreen" id="closeFullscreen">&times;</button>
+        <video id="fullscreenVideo" controls>
+            <source src="" type="video/mp4">
+            您的浏览器不支持视频播放。
+        </video>
+    </div>
+
+    <script>
+        // 教练精彩时刻数据 - 8个紧凑分布
+        const maps = [
+            {
+                id: 1,
+                name: "战术指导",
+                description: "教练在关键时刻的精准战术指导，帮助团队逆转局势，展现了出色的战略眼光和临场指挥能力。",
+                videoUrl: "https://assets.codepen.io/3364143/710-2.mp4",
+                angle: 0
+            },
+            {
+                id: 2,
+                name: "团队激励",
+                description: "教练在比赛关键时刻的激情演讲，激励队员发挥出最佳水平，展现了出色的领导力和感染力。",
+                videoUrl: "https://assets.codepen.io/3364143/710-2.mp4",
+                angle: 45
+            },
+            {
+                id: 3,
+                name: "技术分析",
+                description: "教练对比赛录像的深度分析，精准指出问题所在并提出改进方案，展现了专业的技术洞察力。",
+                videoUrl: "https://assets.codepen.io/3364143/710-2.mp4",
+                angle: 90
+            },
+            {
+                id: 4,
+                name: "心理辅导",
+                description: "教练在队员状态低迷时的心理辅导，帮助队员重拾信心，展现了出色的心理辅导能力。",
+                videoUrl: "https://assets.codepen.io/3364143/710-2.mp4",
+                angle: 135
+            },
+            {
+                id: 5,
+                name: "训练方法",
+                description: "教练创新的训练方法和独特的教学理念，有效提升了团队整体实力，展现了教学创新能力。",
+                videoUrl: "https://assets.codepen.io/3364143/710-2.mp4",
+                angle: 180
+            },
+            {
+                id: 6,
+                name: "赛后总结",
+                description: "教练在比赛后的精彩总结，既肯定了队员的表现，又指出了改进方向，展现了全面的执教能力。",
+                videoUrl: "https://assets.codepen.io/3364143/710-2.mp4",
+                angle: 225
+            },
+            {
+                id: 7,
+                name: "临场应变",
+                description: "教练在比赛中的临场应变能力，根据对手战术及时调整策略，展现了出色的比赛阅读能力。",
+                videoUrl: "https://assets.codepen.io/3364143/710-2.mp4",
+                angle: 270
+            },
+            {
+                id: 8,
+                name: "团队建设",
+                description: "教练在团队建设方面的独特方法，增强了团队凝聚力和战斗力，展现了卓越的管理能力。",
+                videoUrl: "https://assets.codepen.io/3364143/710-2.mp4",
+                angle: 315
+            }
+        ];
+
+        // 创建多种形状的雪花
+        function createSnowflakes() {
+            const snowflakesContainer = document.getElementById('snowflakes');
+            const snowflakeCount = 80;
+            
+            const snowflakeTypes = ['hexagon', 'octagon', 'star'];
+            
+            for (let i = 0; i < snowflakeCount; i++) {
+                const snowflake = document.createElement('div');
+                
+                // 随机雪花类型
+                const type = snowflakeTypes[Math.floor(Math.random() * snowflakeTypes.length)];
+                snowflake.classList.add('snowflake', type);
+                
+                // 随机大小
+                const size = Math.random() > 0.7 ? 'large' : (Math.random() > 0.5 ? 'medium' : 'small');
+                snowflake.classList.add(size);
+                
+                // 随机位置
+                const left = Math.random() * 100;
+                const top = Math.random() * 100;
+                snowflake.style.left = `${left}%`;
+                snowflake.style.top = `${top}%`;
+                
+                // 根据雪花类型添加不同的结构
+                if (type === 'hexagon') {
+                    // 六角雪花添加分支
+                    for (let j = 0; j < 4; j++) {
+                        const branch = document.createElement('div');
+                        branch.classList.add('branch');
+                        snowflake.appendChild(branch);
+                    }
+                } else if (type === 'octagon') {
+                    // 八角雪花添加对角线
+                    const diagonal1 = document.createElement('div');
+                    diagonal1.classList.add('diagonal1');
+                    snowflake.appendChild(diagonal1);
+                    
+                    const diagonal2 = document.createElement('div');
+                    diagonal2.classList.add('diagonal2');
+                    snowflake.appendChild(diagonal2);
+                } else if (type === 'star') {
+                    // 星形雪花添加尖角
+                    for (let j = 0; j < 4; j++) {
+                        const point = document.createElement('div');
+                        point.classList.add('point');
+                        snowflake.appendChild(point);
+                    }
+                }
+                
+                // 随机动画延迟和持续时间
+                const delay = Math.random() * 15;
+                const duration = 8 + Math.random() * 12;
+                
+                // 创建闪烁和浮动动画
+                const keyframes = `
+                    @keyframes snowflakeFloat-${i} {
+                        0%, 100% { 
+                            opacity: 0; 
+                            transform: translate(0, 0) scale(0.8) rotate(0deg);
+                            filter: drop-shadow(0 0 0px white);
+                        }
+                        25% {
+                            opacity: 0.7;
+                            transform: translate(${Math.random() * 40 - 20}px, ${Math.random() * 40 - 20}px) scale(1) rotate(90deg);
+                            filter: drop-shadow(0 0 6px white);
+                        }
+                        50% { 
+                            opacity: 1; 
+                            transform: translate(${Math.random() * 40 - 20}px, ${Math.random() * 40 - 20}px) scale(1.1) rotate(180deg);
+                            filter: drop-shadow(0 0 12px white);
+                        }
+                        75% {
+                            opacity: 0.7;
+                            transform: translate(${Math.random() * 40 - 20}px, ${Math.random() * 40 - 20}px) scale(1) rotate(270deg);
+                            filter: drop-shadow(0 0 6px white);
+                        }
+                    }
+                `;
+                
+                // 添加动画样式
+                const style = document.createElement('style');
+                style.textContent = keyframes;
+                document.head.appendChild(style);
+                
+                // 应用动画
+                snowflake.style.animation = `snowflakeFloat-${i} ${duration}s infinite`;
+                snowflake.style.animationDelay = `${delay}s`;
+                
+                snowflakesContainer.appendChild(snowflake);
+            }
+        }
+
+        // 创建环形图片 - 8个紧凑分布
+        function createMapRing() {
+            const mapRing = document.getElementById('mapRing');
+            const radius = 200; // 减小半径使分布更紧凑
+            
+            maps.forEach(map => {
+                const mapItem = document.createElement('div');
+                mapItem.classList.add('map-item');
+                mapItem.dataset.id = map.id;
+                
+                // 计算位置
+                const angle = (map.angle * Math.PI) / 180;
+                const x = radius * Math.cos(angle);
+                const y = radius * Math.sin(angle);
+                
+                mapItem.style.left = `calc(50% + ${x}px - 60px)`; // 调整偏移量
+                mapItem.style.top = `calc(50% + ${y}px - 60px)`; // 调整偏移量
+                
+                // 创建图片
+                const img = document.createElement('img');
+                // 使用教练相关图片占位
+                img.src = `https://via.placeholder.com/120/626be8/ffffff?text=${map.name}`;
+                img.alt = map.name;
+                
+                // 创建名称
+                const nameElement = document.createElement('div');
+                nameElement.classList.add('map-name');
+                nameElement.textContent = map.name;
+                
+                mapItem.appendChild(img);
+                mapItem.appendChild(nameElement);
+                mapRing.appendChild(mapItem);
+                
+                // 添加点击事件
+                mapItem.addEventListener('click', () => openVideoModal(map));
+            });
+        }
+
+        // 打开视频展示框
+        function openVideoModal(map) {
+            const modal = document.getElementById('videoModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalVideo = document.getElementById('modalVideo');
+            const videoInfo = document.getElementById('videoInfo');
+            
+            modalTitle.textContent = map.name;
+            modalVideo.src = map.videoUrl;
+            videoInfo.textContent = map.description;
+            
+            modal.classList.add('active');
+            
+            // 添加视频播放事件监听
+            modalVideo.addEventListener('play', function() {
+                // 当视频开始播放时，切换到全屏模式
+                openFullscreenVideo(map.videoUrl);
+                modalVideo.pause();
+            });
+        }
+
+        // 打开全屏视频
+        function openFullscreenVideo(videoUrl) {
+            const fullscreen = document.getElementById('videoFullscreen');
+            const fullscreenVideo = document.getElementById('fullscreenVideo');
+            
+            fullscreenVideo.src = videoUrl;
+            fullscreen.classList.add('active');
+            
+            // 播放视频
+            setTimeout(() => {
+                fullscreenVideo.play();
+            }, 300);
+        }
+
+        // 关闭视频展示框
+        function closeVideoModal() {
+            const modal = document.getElementById('videoModal');
+            const modalVideo = document.getElementById('modalVideo');
+            
+            modalVideo.pause();
+            modal.classList.remove('active');
+        }
+
+        // 关闭全屏视频
+        function closeFullscreenVideo() {
+            const fullscreen = document.getElementById('videoFullscreen');
+            const fullscreenVideo = document.getElementById('fullscreenVideo');
+            
+            fullscreenVideo.pause();
+            fullscreen.classList.remove('active');
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            createSnowflakes();
+            createMapRing();
+            
+            // 添加事件监听
+            document.getElementById('closeModal').addEventListener('click', closeVideoModal);
+            document.getElementById('closeFullscreen').addEventListener('click', closeFullscreenVideo);
+            
+            // 点击模态框外部关闭
+            document.getElementById('videoModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeVideoModal();
+                }
+            });
+            
+            // 点击全屏视频外部关闭
+            document.getElementById('videoFullscreen').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeFullscreenVideo();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
